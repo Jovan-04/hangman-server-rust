@@ -14,7 +14,7 @@ Bytes 2-15: unused
 ### Guess Letter
 Sent in REPL to guess a letter. Expected response: None  
 Size: 16 bytes  
-Byte 0: 1
+Byte 0: 1  
 Byte 1: 0  
 Byte 2: Char - letter to guess  
 Bytes 3-15: unused  

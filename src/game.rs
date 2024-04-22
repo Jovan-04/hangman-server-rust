@@ -52,7 +52,7 @@ impl GameState {
         serialized
     }
 
-    pub fn guess_letter(mut self, guess: char) {
+    pub fn guess_letter(&mut self, guess: char) {
         if self.letters_guessed.contains(&guess) {
             return
         }
@@ -74,20 +74,20 @@ impl GameState {
             }
         }
 
-        self.check_game_result();
+        self.update_game_result();
     }
 
-    pub fn guess_word(mut self, guess: &str) {
+    pub fn guess_word(&mut self, guess: &str) {
         if guess == self.word {
             self.word_progress = Vec::from_iter(self.word.chars());
         } else {
             self.incorrect_guesses += 1;
         }
 
-        self.check_game_result();
+        self.update_game_result();
     }
 
-    pub fn check_game_result(mut self) -> GameResult {
+    pub fn update_game_result(&mut self) {
         if self.incorrect_guesses >= 6 { // 6 incorrect guesses for a loss - make this a variable?
             self.game_result = GameResult::Lost;
         }
@@ -95,7 +95,5 @@ impl GameState {
         if !self.word_progress.contains(&'_') {
             self.game_result = GameResult::Won;
         }
-
-        self.game_result
     }
 }

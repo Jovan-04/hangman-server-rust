@@ -35,11 +35,28 @@ fn handle_connection(mut stream: TcpStream, game: &mut GameState) {
     let _ = stream.read(&mut guess_buffer);
     println!("read data from client {:?}", guess_buffer);
 
-    // TODO: update game state based on buffer (see protocol-doc)
+    match guess_buffer[0..2] { // match per protocol-doc
+        [0, 0] => { // request game update
+            // reply GameState to client
+            let to_write = &game.serialize();
+            // println!("{:?}", &to_write);
+            let _ = stream.write(to_write);
+        },
+        [1, 0] => { // letter guess
+            let ltr = guess_buffer[2] as char;
+            game.guess_letter(ltr);
+        },
+        [1, 1] => { // word guess
+            let bytes: Vec<u8> = guess_buffer.iter().skip(2).copied().filter(|&b| b != 0).collect();
 
-    // reply new GS to client
-    let to_write = &game.serialize();
-    // println!("{:?}", &to_write);
-    let _ = stream.write(to_write);
+            let wrd = String::from_utf8_lossy(&bytes);
+
+            game.guess_word(&wrd);
+
+        },
+        _  => {
+            println!("invalid packet {:?}", guess_buffer)
+        },
+    };
 
 }
