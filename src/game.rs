@@ -36,9 +36,18 @@ impl GameState {
 
         // set bytes 14 & 15 per protocol-doc
         match self.game_result {
-            GameResult::Lost => { serialized[14] = 0; serialized[15] = 0; },
-            GameResult::Won => { serialized[14] = 0; serialized[15] = 1; },
-            GameResult::Running => { serialized[14] = 1; serialized[15] = 0; },
+            GameResult::Lost => {
+                serialized[14] = 0;
+                serialized[15] = 0;
+            }
+            GameResult::Won => {
+                serialized[14] = 0;
+                serialized[15] = 1;
+            }
+            GameResult::Running => {
+                serialized[14] = 1;
+                serialized[15] = 0;
+            }
         };
 
         // set byte 16 to the number of incorrect guesses
@@ -46,7 +55,7 @@ impl GameState {
 
         // push rest of the bytes to the array
         for (i, c) in self.letters_guessed.iter().enumerate() {
-            serialized[i+17] = *c as u8;
+            serialized[i + 17] = *c as u8;
         }
 
         serialized
@@ -54,7 +63,7 @@ impl GameState {
 
     pub fn guess_letter(&mut self, guess: char) {
         if self.letters_guessed.contains(&guess) {
-            return
+            return;
         }
 
         let mut indices = Vec::new();
@@ -88,7 +97,8 @@ impl GameState {
     }
 
     pub fn update_game_result(&mut self) {
-        if self.incorrect_guesses >= 6 { // 6 incorrect guesses for a loss - make this a variable?
+        if self.incorrect_guesses >= 6 {
+            // 6 incorrect guesses for a loss - make this a variable?
             self.game_result = GameResult::Lost;
         }
 

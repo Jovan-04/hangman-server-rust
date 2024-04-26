@@ -1,7 +1,10 @@
 mod game;
 
-use std::{io::{self, Read, Write}, net::{TcpListener, TcpStream}};
 use game::GameState;
+use std::{
+    io::{self, Read, Write},
+    net::{TcpListener, TcpStream},
+};
 
 const IP_ADDRESS: &str = "127.0.0.1:25565";
 
@@ -32,11 +35,11 @@ fn prompt_for_word() -> String {
     loop {
         // empty out word buffer on each iteration of the loop to clear out previous input attempt
         word.clear();
-        
+
         io::stdin()
-        .read_line(&mut word)
-        .expect("Failed to read line");
-        
+            .read_line(&mut word)
+            .expect("Failed to read line"); // this can panic; add actual error handling?
+
         // trim whitespace and convert to uppercase
         word = word.trim().to_string().to_ascii_uppercase();
 
@@ -51,7 +54,7 @@ fn prompt_for_word() -> String {
         }
 
         // all checks passed, exit loop
-        break; 
+        break;
     }
 
     word
@@ -72,28 +75,35 @@ fn handle_connection(mut stream: TcpStream, game: &mut GameState) {
     let _ = stream.read(&mut guess_buffer);
     println!("read data from client {:?}", guess_buffer);
 
-    match guess_buffer[0..2] { // match per protocol-doc
-        [0, 0] => { // request game update
+    match guess_buffer[0..2] {
+        // match per protocol-doc
+        [0, 0] => {
+            // request game update
             // reply GameState to client
             let to_write = &game.serialize();
             // println!("{:?}", &to_write);
             let _ = stream.write(to_write);
-        },
-        [1, 0] => { // letter guess
+        }
+        [1, 0] => {
+            // letter guess
             let ltr = guess_buffer[2] as char;
             game.guess_letter(ltr);
-        },
-        [1, 1] => { // word guess
-            let bytes: Vec<u8> = guess_buffer.iter().skip(2).copied().filter(|&b| b != 0).collect();
+        }
+        [1, 1] => {
+            // word guess
+            let bytes: Vec<u8> = guess_buffer
+                .iter()
+                .skip(2)
+                .copied()
+                .filter(|&b| b != 0)
+                .collect();
 
             let wrd = String::from_utf8_lossy(&bytes);
 
             game.guess_word(&wrd);
-
-        },
-        _  => {
+        }
+        _ => {
             println!("invalid packet {:?}", guess_buffer)
-        },
+        }
     };
-
 }
